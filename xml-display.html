@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalog</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .book { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .book h3 { color: #333; margin-top: 0; }
+        .book-id { color: #666; font-size: 0.9em; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Book Catalog</h1>
+    <div id="bookList">Loading books...</div>
+
+    <script>
+        // 动态构建正确的文件路径
+        function getFileUrl(filename) {
+            // 获取当前页面的基础URL
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+            return baseUrl + filename;
+        }
+
+        console.log('Current URL:', window.location.href);
+        console.log('Book XML URL:', getFileUrl('book.xml'));
+
+        fetch(getFileUrl('book.xml'))
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response URL:', response.url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(xmlText => {
+                console.log('Successfully received XML data');
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                
+                // 检查XML解析错误
+                const parseError = xmlDoc.getElementsByTagName('parsererror')[0];
+                if (parseError) {
+                    throw new Error('XML parsing error: ' + parseError.textContent);
+                }
+                
+                // 显示数据
+                const books = xmlDoc.getElementsByTagName('book');
+                const bookList = document.getElementById('bookList');
+                
+                if (books.length === 0) {
+                    bookList.innerHTML = '<p class="error">No books found in XML file.</p>';
+                    return;
+                }
+                
+                bookList.innerHTML = '';
+                for (let book of books) {
+                    const id = book.getAttribute('id');
+                    const title = book.getElementsByTagName('title')[0]?.textContent || 'No title';
+                    const author = book.getElementsByTagName('author')[0]?.textContent || 'Unknown author';
+                    const price = book.getElementsByTagName('price')[0]?.textContent || 'N/A';
+                    
+                    const bookDiv = document.createElement('div');
+                    bookDiv.className = 'book';
+                    bookDiv.innerHTML = `
+                        <h3>${title}</h3>
+                        <div class="book-id">ID: ${id}</div>
+                        <p><strong>Author:</strong> ${author}</p>
+                        <p><strong>Price:</strong> $${price}</p>
+                    `;
+                    
+                    bookList.appendChild(bookDiv);
+                }
+            })
+            .catch(err => {
+                console.error('Fetch error:', err);
+                document.getElementById('bookList').innerHTML = 
+                    `<div class="error">
+                        <h3>Error Loading Books</h3>
+                        <p>${err.message}</p>
+                        <p>Please check:</p>
+                        <ul>
+                            <li>book.xml file exists in repository</li>
+                            <li>File names are correct (case-sensitive)</li>
+                            <li>Check browser console for details</li>
+                        </ul>
+                    </div>`;
+            });
+    </script>
+</body>
+</html>

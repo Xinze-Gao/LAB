@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profiles</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .user-profile { 
+            background: white; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .user-profile h2 { 
+            color: #2c3e50; 
+            margin-top: 0; 
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .profile-section { margin: 15px 0; }
+        .profile-section h3 { 
+            color: #34495e; 
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+        }
+        .info-item { margin: 5px 0; }
+        .label { font-weight: bold; color: #555; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>User Profiles</h1>
+    <div id="userProfiles">Loading user profiles...</div>
+
+    <script>
+
+        function getFileUrl(filename) {
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+            return baseUrl + filename;
+        }
+
+        console.log('JSON file URL:', getFileUrl('userProfiles.json'));
+
+        fetch(getFileUrl('userProfile.json'))
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Successfully received JSON data:', data);
+                const userProfiles = document.getElementById('userProfiles');
+                
+                if (!data.users || data.users.length === 0) {
+                    userProfiles.innerHTML = '<p class="error">No user profiles found.</p>';
+                    return;
+                }
+                
+                userProfiles.innerHTML = '';
+                data.users.forEach(user => {
+                    const profileDiv = document.createElement('div');
+                    profileDiv.className = 'user-profile';
+                    
+                    profileDiv.innerHTML = `
+                        <h2>${user.firstName} ${user.lastName}</h2>
+                        
+                        <div class="profile-section">
+                            <h3>Personal Information</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">Email:</span> ${user.email}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Date of Birth:</span> ${user.dateOfBirth}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3>Address</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">Street:</span> ${user.address.street}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">City:</span> ${user.address.city}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">State:</span> ${user.address.state}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Zip Code:</span> ${user.address.zipCode}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3>Preferences</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="label">Theme:</span> ${user.preferences.theme}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Language:</span> ${user.preferences.language}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Notifications:</span> ${user.preferences.notifications ? 'Enabled' : 'Disabled'}
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Newsletter:</span> ${user.preferences.subscription ? 'Subscribed' : 'Not Subscribed'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    userProfiles.appendChild(profileDiv);
+                });
+            })
+            .catch(err => {
+                console.error('Fetch error:', err);
+                document.getElementById('userProfiles').innerHTML = 
+                    `<div class="error">
+                        <h3>Error Loading User Profiles</h3>
+                        <p>${err.message}</p>
+                        <p>Please check:</p>
+                        <ul>
+                            <li>userProfiles.json file exists</li>
+                            <li>JSON format is correct</li>
+                            <li>Check browser console for details</li>
+                        </ul>
+                    </div>`;
+            });
+    </script>
+</body>
+</html>
