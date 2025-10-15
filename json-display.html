@@ -41,14 +41,14 @@
     <div id="userProfiles">Loading user profiles...</div>
 
     <script>
-        // 动态构建正确的文件路径
+       
         function getFileUrl(filename) {
             const currentUrl = window.location.href;
             const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
             return baseUrl + filename;
         }
 
-        // 重要修正：使用正确的文件名 userProfile.json
+        
         console.log('JSON file URL:', getFileUrl('userProfile.json'));
 
         fetch(getFileUrl('userProfile.json'))

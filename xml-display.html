@@ -17,9 +17,9 @@
     <div id="bookList">Loading books...</div>
 
     <script>
-        // 动态构建正确的文件路径
+        
         function getFileUrl(filename) {
-            // 获取当前页面的基础URL
+            
             const currentUrl = window.location.href;
             const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
             return baseUrl + filename;
@@ -43,13 +43,13 @@
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
                 
-                // 检查XML解析错误
+                
                 const parseError = xmlDoc.getElementsByTagName('parsererror')[0];
                 if (parseError) {
                     throw new Error('XML parsing error: ' + parseError.textContent);
                 }
                 
-                // 显示数据
+                
                 const books = xmlDoc.getElementsByTagName('book');
                 const bookList = document.getElementById('bookList');
                 
